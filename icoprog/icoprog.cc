@@ -15,6 +15,14 @@
  *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
+
+
+sudo apt-get install libftdi-dev
+git clone https://github.com/cliffordwolf/icestorm.git
+cd iceprog
+make 
+sudo make install
+
  */
 
 #include <time.h>
@@ -41,12 +49,13 @@ bool enable_data_port = false;
 #  include <wiringPi.h>
 
 #  define RPI_ICE_CLK     14 // GP11 -- 
-#  define RPI_ICE_CDONE   16 // GP15 -- 
+#  define RPI_ICE_CDONE   2  // gp27 -- 
 #  define RPI_ICE_MOSI    12 // GP10 --
 #  define RPI_ICE_MISO    13 // GP09 -- 
-#  define LOAD_FROM_FLASH 25 // IGNORE -- PIN 33, GPIO.23
-#  define RPI_ICE_CRESET   6 // GP25 -- 
 #  define RPI_ICE_CS      11 // GP07 -- 
+#  define RPI_ICE_CRESET   3 // GP22 -- 
+
+#  define LOAD_FROM_FLASH 25 // IGNORE -- PIN 33, GPIO.23
 #  define RPI_ICE_SELECT  24 // IGNORE --PIN 32, GPIO.26
 
 #  define RASPI_D8   0 // PIN 11, GPIO.0
@@ -829,6 +838,22 @@ void prog_flasherase()
 
 void prog_flashmem(int pageoffset, bool erase_first_block)
 {
+
+/** USED
+#  define RPI_ICE_CDONE   2  // gp27 -- 
+
+#  define RPI_ICE_CLK     14 // GP11 -- 
+#  define RPI_ICE_MOSI    12 // GP10 --
+#  define RPI_ICE_MISO    13 // GP09 -- 
+#  define RPI_ICE_CS      11 // GP07 -- 
+
+#  define RPI_ICE_CRESET   3 // GP22 --  **/
+
+// Two pins not used
+//#  define LOAD_FROM_FLASH 25 // IGNORE -- PIN 33, GPIO.23
+//#  define RPI_ICE_SELECT  24 // IGNORE --PIN 32, GPIO.26
+
+
 	assert(enable_prog_port);
 
 	pinMode(RPI_ICE_CLK,     OUTPUT);
@@ -838,9 +863,9 @@ void prog_flashmem(int pageoffset, bool erase_first_block)
 	pinMode(RPI_ICE_SELECT,  OUTPUT);
 
 	// connect flash to Raspi
-	digitalWrite(LOAD_FROM_FLASH, LOW);
-	digitalWrite(RPI_ICE_SELECT, HIGH);
-	digitalWrite(RPI_ICE_CS, HIGH);
+	//digitalWrite(LOAD_FROM_FLASH, LOW);
+	//digitalWrite(RPI_ICE_SELECT, HIGH);
+	digitalWrite(RPI_ICE_CS, LOW);
 	digitalWrite(RPI_ICE_CLK, LOW);
 	digitalSync(100);
 

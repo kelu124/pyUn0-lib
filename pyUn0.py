@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 
 from spi_connector import SpiConnector
 
+import warnings
+warnings.filterwarnings("ignore")
+
 __author__ = "kelu124"
 __copyright__ = "Copyright 2018, Kelu124"
 __license__ = "GPLv3"
@@ -151,21 +154,21 @@ class DataToJson:
             A = d["data"]
             for i in range(int(len(A) / 2 - 1)):
                 if (A[2 * i + 1]) < 128:
-                    value = 128 * (A[2 * i + 0] & 0b00011111) + A[2 * i + 1] - 4 * 512
+                    value = 128*(A[2*i+0]&0b0000111) + A[2*i+1] - 512
                     IDLine.append(
-                        ((A[2 * i + 0] & 0b11110000) / 16 - 8) / 2
+                        ((A[2 * i + 0] & 0b11111100) / 16 - 8) / 2
                     )  # Identify the # of the line
                     TT1.append((A[2 * i + 0] & 0b00001000) / 0b1000)
                     TT2.append((A[2 * i + 0] & 0b00010000) / 0b10000)
-                    tmp.append(2.0 * value / (4 * 512.0))
+                    tmp.append(2.0 * value/512.0)
                 else:
-                    value = 128 * (A[2 * i + 1] & 0b00011111) + A[2 * i + 2] - 4 * 512
+                    value = 128*(A[2*i+1]&0b111) + A[2*i+2] - 512
                     IDLine.append(
-                        ((A[2 * i + 1] & 0b00011111) / 16 - 8) / 2
+                        ((A[2 * i + 1] & 0b11111100) / 16 - 8) / 2
                     )  # Identify the # of the line
                     TT1.append((A[2 * i + 1] & 0b00001000) / 0b1000)
                     TT2.append((A[2 * i + 1] & 0b00010000) / 0b10000)
-                    tmp.append(2.0 * value / (4 * 512.0))
+                    tmp.append(2.0 * value/512.0)
             print("Data acquired")
             self.Registers = d["registers"]
             self.timings = d["timings"]
@@ -218,6 +221,7 @@ class DataToJson:
             self.Duration = (
                 self.parameters["LengthAcq"] - self.parameters["DeltaAcq"]
             ) / 1000.0
+            print("done")
 
     def create_fft(self):
         self.FFT_x = [X * self.f / self.LengthT for X in range(self.LengthT)]
@@ -253,9 +257,9 @@ class DataToJson:
                 plt.show()
             description_experiment = "FFT of the of " + self.iD
             description_experiment += " experiment. " + self.experiment["description"]
-            tag_image(
-                file_name, "matty, cletus", self.iD, "FFT", description_experiment
-            )
+            #tag_image(
+            #    file_name, "matty, cletus", self.iD, "FFT", description_experiment
+            #)
 
     def make_image(self):
         """
@@ -275,16 +279,16 @@ class DataToJson:
             plt.savefig(file_name)
             if self.show_images:
                 plt.show()
-            tag_image(
-                file_name,
-                "matty",
-                self.iD,
-                "graph",
-                "Automated image of "
-                + self.iD
-                + " experiment. "
-                + self.experiment["description"],
-            )
+            #tag_image(
+            #    file_name,
+            #    "matty",
+            #    self.iD,
+            #    "graph",
+            #    "Automated image of "
+            #    + self.iD
+            #    + " experiment. "
+            #    + self.experiment["description"],
+            #)
 
     @staticmethod
     def tag_image(bricks, experiment_id, img_type, img_desc, file_name):
@@ -294,6 +298,7 @@ class DataToJson:
         # file_name = "images/"+self.iD+"-"+str(self.N)+".jpg"
         # @todo : create images folder if not exists
         try:
+ 
             import pyexiv2
             metadata = pyexiv2.ImageMetadata(file_name)
             try:
@@ -361,13 +366,13 @@ class DataToJson:
         plt.tight_layout()
         file_name = "images/2DArray_" + self.iD + "-" + str(self.N) + ".jpg"
         plt.savefig(file_name)
-        tag_image(
-            file_name,
-            "matty, " + self.piezo,
-            self.iD,
-            "BC",
-            self.create_title_text().replace("\n", ". "),
-        )
+        #tag_image(
+        #    file_name,
+        #    "matty, " + self.piezo,
+        #    self.iD,
+        #    "BC",
+        #    self.create_title_text().replace("\n", ". "),
+        #)
         if self.show_images:
             plt.show()
         self.raw_2d_image = clean_image  # @todo: reuse this 2D image ?
@@ -470,7 +475,7 @@ class DataToJson:
             file_name = "images/Spectrum_" + self.iD + "-" + str(self.N) + ".jpg"
             plt.savefig(file_name)
             img_desc = self.create_title_text().replace("\n", ". ")
-            tag_image(file_name, "matty," + self.piezo, self.iD, "FFT", img_desc)
+            #tag_image(file_name, "matty," + self.piezo, self.iD, "FFT", img_desc)
         else:
             print("2D Array not created yet")
 
@@ -577,9 +582,10 @@ if __name__ == "__main__":
         if "single" in sys.argv[1]:
             UN0RICK = SpiConnector()
             UN0RICK.test_spi(3)
-            UN0RICK.set_HV(1000)
-            UN0RICK.set_hilo(1)
-            TGCC = UN0RICK.create_tgc_curve(600, 600, True)[
+
+            #UN0RICK.set_HV(1000)
+            #UN0RICK.set_hilo(1)
+            TGCC = UN0RICK.create_tgc_curve(600, 900, True)[
                 0
             ]  # Gain: linear, 10mV to 980mV
             UN0RICK.set_tgc_curve(TGCC)  # We then apply the curve
@@ -590,7 +596,7 @@ if __name__ == "__main__":
             UN0RICK.set_acquisition_number_lines(1)  # Setting the number of lines (1)
             UN0RICK.set_msps(0)  # Sampling speed setting
             A = UN0RICK.set_timings(
-                200, 10, 200, 2000, 5000, 110000
+                200, 10, 200, 2000, 5000, 190000
             )  # Settings the series of pulses
             UN0RICK.JSON[
                 "data"
@@ -608,7 +614,7 @@ if __name__ == "__main__":
             UN0RICK.set_acquisition_number_lines(10)  # Setting the number of lines (3)
             UN0RICK.set_msps(0)  # Sampling speed setting
             A = UN0RICK.set_timings(
-                200, 100, 1000, 2000, 100000
+                200, 10, 200, 2000, 5000, 190000
             )  # Settings the series of pulses
             UN0RICK.JSON[
                 "data"
@@ -617,7 +623,7 @@ if __name__ == "__main__":
         if "process" in sys.argv[1]:
             make_clean("./")
             for MyDataFile in os.listdir("./data/"):
-                if MyDataFile.endswith(".json"):
+                if MyDataFile.endswith(".json"):# and not "_" in MyDataFile:
                     print(MyDataFile)
                     y = DataToJson()
                     y.show_images = False

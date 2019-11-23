@@ -32,7 +32,7 @@ def new_n(path, expe_id):
 
 
 class SpiRegisters(Enum):
-    LED_READ = 0xC1
+    LED_RED = 0xC1
     LED_GREEN = 0xC2
     LED_BLUE = 0xC3
     HILO_REG = 0xD8
@@ -105,10 +105,25 @@ class SpiConnector:
         """
         if gpioexists:
             GPIO.setmode(GPIO.BCM)
-            # Once program is loaded, should be OK
-            # for k in [3,4,17,27,5,12,16,20,15]:
-            # GPIO.setup(k, GPIO.IN)
-            # @todo: reset from flash when flash works
+
+            GPIO.setmode(GPIO.BCM)
+            PRESET = 23 ## Reset for the FPGA
+            IO4 = 26 ## 26 is the output connected to
+            #@todo check 3 lines below
+            CS_FLASH = 7
+            GPIO.setup(CS_FLASH,GPIO.OUT)  
+            GPIO.output(CS_FLASH,GPIO.LOW)
+    
+            GPIO.setup(PRESET, GPIO.OUT)
+            GPIO.setup(IO4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    
+            print("Reset GPIO 23 - Low 1s")
+            GPIO.output(PRESET, GPIO.LOW)
+            time.sleep(1)
+            print("Reset GPIO 23 - High 0.2s")
+            GPIO.output(PRESET, GPIO.HIGH)
+            time.sleep(0.2)
+
             self.spi.open(0, 0)  # CS0 is the FPGA, CS1 is flash
             self.spi.mode = self.SPI_MODE
             self.spi.max_speed_hz = self.SPI_SPEED
@@ -116,7 +131,7 @@ class SpiConnector:
                 print("spi.cshigh is " + str(self.spi.cshigh))
                 print("spi mode is " + str(self.spi.mode))
                 print("spi maxspeed is " + str(self.spi.max_speed_hz) + "hz")
-            self.set_led_rgb(0, 1, 0)
+            #self.set_led_rgb(0, 1, 0)
         else:
             print("Not running from a Raspberry Pi")
 
@@ -207,6 +222,10 @@ class SpiConnector:
         """
         Basic function to write registers value to the FPGA
         """
+
+        if not isinstance(address, int):
+            address = address.value
+            #print("Value,",value," et addresse: ",address)
         if gpioexists:
             self.spi.xfer([0xAA])
             self.spi.xfer([address])
@@ -215,7 +234,8 @@ class SpiConnector:
         self.JSON["registers"][int(address)] = value
 
     def set_led_rgb(self, red, gren, blue):
-        self.write_fpga(SpiRegisters.LED_READ, red)
+        print(SpiRegisters.LED_RED)
+        self.write_fpga(SpiRegisters.LED_RED, red)
         self.write_fpga(SpiRegisters.LED_GREEN, gren)
         self.write_fpga(SpiRegisters.LED_BLUE, blue)
 
@@ -227,7 +247,14 @@ class SpiConnector:
         """
         Blinks the HILO n_cycles times.
         """
-        self.set_led_rgb(0, 0, 1)
+        i = 0
+
+        while i < n_cycles:
+            self.write_fpga(SpiRegisters.MULTI_LINES_REG, 0x01) # 0: single mode 1 continious mode
+            time.sleep(0.5)
+            self.write_fpga(SpiRegisters.MULTI_LINES_REG, 0x00) # 0: single mode 1 continious mode
+            time.sleep(0.5)
+            i = i+1
 
     def set_hilo(self, hilo):  # OK LIT3RICK
         """
@@ -302,6 +329,7 @@ class SpiConnector:
                     )
             end = time.time()
             delta = end - start
+            
             if self.verbose:
                 print("Took %.2f seconds to transfer." % delta)
                 print("for " + str(2 * self.Nacq + 2) + " transfers of data")
@@ -309,22 +337,10 @@ class SpiConnector:
             name_json = (
                 self.JSON["experiment"]["id"] + "-" + str(self.JSON["N"]) + ".json"
             )
-            with open(name_json, "w") as outfile:
+            
+            with open(name_json, 'w') as outfile:
                 json.dump(self.JSON, outfile)
-            self.JSON["data"] = []
-            self.write_fpga(SpiRegisters.CLEAN_MEM_POINTER, 0x01)  # Cleaning memory pointer
-            self.set_led_rgb(0, 0, 1)
-            for i in range(2 * self.Nacq + 2):
-                self.JSON["data"].append(self.spi.xfer([0x00])[0])
-            name_json = (
-                "_"
-                + self.JSON["experiment"]["id"]
-                + "-"
-                + str(self.JSON["N"])
-                + ".json"
-            )
-            with open(name_json, "w") as outfile:
-                json.dump(self.JSON, outfile)
+                
             if self.verbose:
                 print(name_json + ": file saved.")
         else:
