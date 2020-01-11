@@ -225,7 +225,9 @@ class SpiConnector:
 
         if not isinstance(address, int):
             address = address.value
-            #print("Value,",value," et addresse: ",address)
+        address = int(address)
+        value = int(value)
+        print("Value,",value," et addresse: ",address)
         if gpioexists:
             self.spi.xfer([0xAA])
             self.spi.xfer([address])
@@ -592,19 +594,19 @@ class SpiConnector:
         print(t2, t4, t6, t8, t9, t10)
         print(
             "Key timings",
-            hex(t2 * 128 / 1000),
-            hex(t4 * 128 / 1000),
-            hex(t6 * 128 / 1000),
-            hex(t8 * 128 / 1000),
-            hex(t9 * 128 / 1000),
-            hex(t10 * 128 / 1000),
+            hex(int(t2 * 128 / 1000)),
+            hex(int(t4 * 128 / 1000)),
+            hex(int(t6 * 128 / 1000)),
+            hex(int(t8 * 128 / 1000)),
+            hex(int(t9 * 128 / 1000)),
+            hex(int(t10 * 128 / 1000)),
         )
         print(
             "Smaller inter periods",
             hex(int(t1 * 128 / 1000)),
-            hex(t3 * 128 / 1000),
-            hex(t5 * 128 / 1000),
-            hex(t7 * 128 / 1000),
+            hex(int(t3 * 128 / 1000)),
+            hex(int(t5 * 128 / 1000)),
+            hex(int(t7 * 128 / 1000)),
         )
         print("--------------------------- ")
         print("Set_pulse_train 'l_acq' " + str(l_acq))
