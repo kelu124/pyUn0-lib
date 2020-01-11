@@ -153,34 +153,29 @@ class SpiConnector:
         self.set_tgc_curve(dac_array)
         return dac_array, len(dac_array)
 
-    def set_timings(self, p_on, p_damp_one, p_HV_neg, p_off, delay_acq, acq=None):
+    def set_timings(self, t1, t2, t3, WaitTill, t5):
         """
         Programs the sequence of Pon, Poff, Acquisition.
         """
-        # t4 = WaitTill # 20us delay before acquisition
-        # Pon, PdampOne, PHVneg, Poff, delay_acq, Acq
-        # self.set_pulse_train(t1, t2, t3, t4, t5)
-        self.set_pulse_train(p_on, p_damp_one, p_HV_neg, p_off, delay_acq, acq)
+        t4 = WaitTill # 20us delay before acquisition
+        self.set_pulse_train(t1, t2, t3, t4, t5)
         # Some figures about the acquisitions now
-        self.LAcq = (acq - delay_acq) / 1000  # ns to us
+        self.LAcq = (t5-WaitTill)/1000 #ns to us
         self.Nacq = int(self.LAcq * self.f_ech * self.number_lines)
-        self.JSON["timings"]["t1"] = p_on
-        self.JSON["timings"]["t2"] = p_damp_one
-        self.JSON["timings"]["t3"] = p_HV_neg
-        self.JSON["timings"]["t4"] = p_off
-        self.JSON["timings"]["t5"] = delay_acq
-        self.JSON["timings"]["t5"] = acq
+        self.JSON["timings"]["t1"] = t1
+        self.JSON["timings"]["t2"] = t2
+        self.JSON["timings"]["t3"] = t3
+        self.JSON["timings"]["t4"] = WaitTill
+        self.JSON["timings"]["t5"] = t5
         self.JSON["timings"]["NAcq"] = self.Nacq
         self.JSON["timings"]["LAcq"] = self.LAcq
         self.JSON["timings"]["Fech"] = self.f_ech
         self.JSON["timings"]["NLines"] = self.number_lines
-
-        print("NAcq = " + str(self.Nacq))
-        if self.Nacq > 199999:
-            raise NameError(
-                "Acquisition length over 200.000 points (8Mb = Flash limit)"
-            )
+        print("NAcq = "+str(self.Nacq))
+        if self.Nacq > 499999:
+            raise NameError('Acquisition length over 500.000 points (8Mb = Flash limit)')
         return self.Nacq, self.LAcq, self.f_ech, self.number_lines
+
 
     def set_multi_lines(self, set_multi):  # OK LIT3RICK
         """
@@ -570,44 +565,29 @@ class SpiConnector:
         self.write_fpga(SpiRegisters.REPEAT_LENGTH_LSB, repeat_length_lsb)  # Period of one cycle LSB
         return repeat_length_arg * 1000 / 128
 
-    def set_pulse_train(self, Pon, PdampOne, PHVneg, PdampTwo, pDelay, Acq):
-        delays = 10
-        t1 = delays
-        t2 = t1 + Pon
-        t3 = t2 + delays
-        t4 = t3 + PdampOne
-        t5 = t4 + delays
-        t6 = t5 + PHVneg
-        t7 = t6 + delays
-        t8 = t7 + PdampTwo
-        t9 = t8 + pDelay
-        t10 = t9 + Acq
+    def set_pulses_delay(self, pulse_on_off_delay_val):
+    # Set Lengh between Pon and Poff
+        if pulse_on_off_delay_val > 2500:
+            pulse_on_off_delay_val = 2500
+        elif pulse_on_off_delay_val < 0:
+            pulse_on_off_delay_val = 0
+        HPP = int(pulse_on_off_delay_val*128/1000) 
+        #print  hex(HPP)
+        self.JSON["parameters"]["PulsesDelay"] = int(pulse_on_off_delay_val)
+        self.JSON["parameters"]["PulsesDelay_Real"] = int(HPP*1000/128)
+        print("Pulses delay:", pulse_on_off_delay_val, "ns -- ", hex(HPP))
+        self.write_fpga(0xD0, HPP) # set sEEPon
+        return HPP*1000/128
 
-        self.write_fpga(SpiRegisters.SET_PULSE_TRAIN_REG1, int(t1) * 128 / 1000)
-        self.write_fpga(SpiRegisters.SET_PULSE_TRAIN_REG2, int(t3) * 128 / 1000)
-        self.write_fpga(SpiRegisters.SET_PULSE_TRAIN_REG3, int(t5) * 128 / 1000)  # PDamp1 and PnHV
-        self.write_fpga(SpiRegisters.SET_PULSE_TRAIN_REG4, int(t7) * 128 / 1000)  # PnHV and PDamp2
-        refponnhv = self.set_poff(t8)  # @unused @tocheck
-        endPoff = self.set_delta_acq(t9)  # @unused @tocheck
-        l_acq = self.set_length_acq(t10)
-        print("----- Check of timings ---- ")
-        print(t2, t4, t6, t8, t9, t10)
-        print(
-            "Key timings",
-            hex(int(t2 * 128 / 1000)),
-            hex(int(t4 * 128 / 1000)),
-            hex(int(t6 * 128 / 1000)),
-            hex(int(t8 * 128 / 1000)),
-            hex(int(t9 * 128 / 1000)),
-            hex(int(t10 * 128 / 1000)),
-        )
-        print(
-            "Smaller inter periods",
-            hex(int(t1 * 128 / 1000)),
-            hex(int(t3 * 128 / 1000)),
-            hex(int(t5 * 128 / 1000)),
-            hex(int(t7 * 128 / 1000)),
-        )
-        print("--------------------------- ")
-        print("Set_pulse_train 'l_acq' " + str(l_acq))
+    def set_pulse_train(self, Pon, Pdelay, Poff, delay_acq, Acq):
+        tpon = self.set_pon(Pon)
+        print("tpon = ",tpon)
+        tpulsedelay = self.set_pulses_delay(tpon+Pdelay)
+        print("tpulsedelay = ",tpulsedelay,tpon,Pdelay)
+        tmp = self.set_poff(Poff+tpulsedelay) #@unused @tocheck
+        print("Poff = ",tmp,Poff,tpulsedelay)
+        tmp = self.set_delta_acq(delay_acq) #@unused @tocheck
+        print("delay_acq = ",tmp,delay_acq)
+        l_acq = self.set_length_acq(Acq)
+        print("Set_pulse_train 'l_acq' "+str(l_acq))
         return l_acq

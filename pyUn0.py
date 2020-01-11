@@ -596,7 +596,7 @@ if __name__ == "__main__":
             UN0RICK.set_acquisition_number_lines(1)  # Setting the number of lines (1)
             UN0RICK.set_msps(0)  # Sampling speed setting
             A = UN0RICK.set_timings(
-                200, 10, 200, 2000, 5000, 190000
+                200, 10, 2000, 5000, 190000
             )  # Settings the series of pulses
             UN0RICK.JSON[
                 "data"
@@ -614,7 +614,7 @@ if __name__ == "__main__":
             UN0RICK.set_acquisition_number_lines(10)  # Setting the number of lines (3)
             UN0RICK.set_msps(0)  # Sampling speed setting
             A = UN0RICK.set_timings(
-                200, 10, 200, 2000, 5000, 190000
+                200, 10, 2000, 5000, 190000
             )  # Settings the series of pulses
             UN0RICK.JSON[
                 "data"
