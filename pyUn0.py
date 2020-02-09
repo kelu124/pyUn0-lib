@@ -240,10 +240,10 @@ class DataToJson:
 
         if self.processed:
             plt.figure(figsize=(15, 5))
-
-            plot_time = self.FFT_x[1:self.LengthT / 2]
-            plot_abs_fft = np.abs(self.FFT_y[1:self.LengthT / 2])
-            plot_filtered_fft = np.abs(self.filtered_fft[1:self.LengthT / 2])
+            middle = int(self.LengthT / 2)-1
+            plot_time = self.FFT_x[1:middle]
+            plot_abs_fft = np.abs(self.FFT_y[1:middle])
+            plot_filtered_fft = np.abs(self.filtered_fft[1:middle])
 
             plt.plot(plot_time, plot_abs_fft, "b-")
             plt.plot(plot_time, plot_filtered_fft, "y-")
@@ -251,7 +251,7 @@ class DataToJson:
             plt.title("FFT of " + self.iD + " - acq. #: " + str(self.N))
             plt.xlabel("Freq (MHz)")
             plt.tight_layout()
-            file_name = "images/" + self.iD + "-" + str(self.N) + "-fft.jpg"
+            file_name = "images/" + self.iD + "-" + str(self.N) + "-fft.png"
             plt.savefig(file_name)
             if self.show_images:
                 plt.show()

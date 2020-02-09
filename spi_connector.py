@@ -222,7 +222,7 @@ class SpiConnector:
             address = address.value
         address = int(address)
         value = int(value)
-        print("Value,",value," et addresse: ",address)
+        #print("Value,",value," et addresse: ",address)
         if gpioexists:
             self.spi.xfer([0xAA])
             self.spi.xfer([address])
