@@ -35,15 +35,17 @@ else:
 
 
 '''Description: Most updated library for the un0rick platform. 
-`20190415a`
+Compatible for a RPi4/python3 setup 
+`220200109a` expe
 @todo: improve doc: http://sametmax.com/les-docstrings/
 '''
 
 __author__ = "kelu124"
-__copyright__ = "Copyright 2018, Kelu124"
+__copyright__ = "Copyright 2018-2020, kelu124"
 __license__ = "GPLv3"
-
-
+__version__ = "1.0.0"
+__maintainer__ = "kelu124" 
+__status__ = "Production"
 
 
 
