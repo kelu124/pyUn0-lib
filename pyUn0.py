@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
+from scipy.signal import hilbert
 
 try:
     import RPi.GPIO as GPIO
@@ -64,8 +65,8 @@ class us_spi:
     JSON = {}
     spi = spidev.SpiDev()
 
-    JSON["firmware_md5"] = "fa6a7560ade6d6b1149b6e78e0de051f"
-    JSON["firmware_version"] = "e_un0"
+    JSON["firmware_md5"] = "dc9ece10627d97eec40cbe3ed872cf39"
+    JSON["firmware_version"] = "v1.1.bin"
     JSON["data"] = []
     JSON["time"] = "NOW" #// todo, pass to py3 unicode(datetime.datetime.now())
     JSON["registers"] = {}
@@ -597,8 +598,7 @@ class us_json:
                     IDLine[i] = 0
             self.LengthT = len(t)
 
-            #self.EnvHil = self.filtered_signal
-            #self.EnvHil = np.asarray(np.abs(signal.rrt(self.filtered_signal)))
+
 
             self.TT1 = TT1
             self.TT2 = TT2
@@ -673,7 +673,8 @@ class us_json:
             description_experiment = "FFT of the of "+self.iD
             description_experiment += " experiment. "+self.experiment["description"]
             tag_image(file_name,"matty, cletus", self.iD, "FFT", description_experiment)
-
+        self.EnvHil = self.filtered_signal
+        self.EnvHil = np.asarray(np.abs(hilbert(self.filtered_signal)))
 
 
     def mkImg(self):
@@ -683,8 +684,13 @@ class us_json:
         if self.processed: #@todo check this to get env & al
             fig, ax1 = plt.subplots(figsize=(20, 10))
             ax2 = ax1.twinx()
-            ax2.plot(self.t[0:self.len_line], self.tdac[0:self.len_line], 'g-')
-            ax1.plot(self.t[0:self.len_line], self.tmp[0:self.len_line], 'b-')
+            ax2.plot(self.t[0:self.len_line], self.tdac[0:self.len_line], "g", label = "GAIN")
+            ax1.plot(self.t[0:self.len_line], self.tmp[0:self.len_line], "k", label = "Raw signal",alpha=0.9)
+            if len(self.filtered_signal):
+                ax1.plot(self.t[0:self.len_line], self.filtered_signal[0:self.len_line],"y",label="Filtered signal",alpha=0.5)
+            if len(self.EnvHil):
+                ax1.plot(self.t[0:self.len_line], self.EnvHil[0:self.len_line],"r",label="Enveloppe")
+            ax1.legend()
             plt.title(self.create_title_text())
             ax1.set_xlabel('Time (us)')
             ax1.set_ylabel('Signal from ADC (V)', color='b')
