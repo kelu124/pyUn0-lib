@@ -1,6 +1,6 @@
 # un0rick companion - pyUn0 module
 
-The aim of this module is to provide a Python API to the [un0rick board][http://un0rick.cc/un0rick)], a Lattice FPGA-powered ultrasound pulse-echo board.
+The aim of this module is to provide a Python API to the [un0rick board](http://un0rick.cc/un0rick), a Lattice FPGA-powered ultrasound pulse-echo board.
 
 In this setup, the [board has been flashed](http://un0rick.cc/un0rick/rpi-setup) with a dedicated [binary](https://github.com/kelu124/un0rick/raw/master/bins/v1.1.bin) using iceprog, and connected to the RPi using a 40-pin ribbon.
 
@@ -27,7 +27,7 @@ python3 pyUn0.py single
 python3 pyUn0.py process
 ```
 
-## Setup of the "single" parameter acquisition
+## Setup of the "single" parameter acquisition
 
 
 ```python
@@ -46,7 +46,7 @@ A = UN0RICK.set_timings(200, 100, 2000, 5000, 200000)# Settings the series of pu
 UN0RICK.JSON["data"] = UN0RICK.do_acquisition()      # Doing the acquisition and saves
 ```
 
-## Seems to be working 
+## Example of a piezo with a reflector a few cm away
 
 ![](/images/20201009a-1.png)
 
