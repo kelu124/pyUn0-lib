@@ -167,9 +167,9 @@ class us_spi:
         """
         print(value,int(value))
         if gpioexists:
-            self.spi.xfer([0xAA])
-            self.spi.xfer([adress])
-            self.spi.xfer([int(value)])
+            self.spi.writebytes([0xAA])
+            self.spi.writebytes([adress])
+            self.spi.writebytes([int(value)])
             #self.spi.xfer([value])
             self.JSON["registers"][int(adress)] = value
 
