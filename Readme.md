@@ -1,12 +1,30 @@
-# pyUn0 lib
+# un0rick companion - pyUn0 module
 
-## Working for un0rick !
+The aim of this module is to provide a Python API to the [un0rick board][http://un0rick.cc/un0rick)], a Lattice FPGA-powered ultrasound pulse-echo board.
+
+In this setup, the [board has been flashed](http://un0rick.cc/un0rick/rpi-setup) with a dedicated [binary](https://github.com/kelu124/un0rick/raw/master/bins/v1.1.bin) using iceprog, and connected to the RPi using a 40-pin ribbon.
+
+## Setup
+
+In short, it looks like this:
+
+![](https://raw.githubusercontent.com/kelu124/echomods/master/matty/images/P_20191123_161358.jpg)
+
+## Testing for un0rick
 
 Been testing it on un0rick v1.1 (with double SMA connectors) on a RPi4, with python2 and python3.
 
+To get a blinky, one can use the following
+
 ```
-python pyUn0.py single
-python pyUn0.py process
+python3 pyUn0.py single
+```
+
+For a single line,
+
+```
+python3 pyUn0.py single
+python3 pyUn0.py process
 ```
 
 ## Setup of the "single" parameter acquisition
