@@ -1,8 +1,19 @@
+![GitHub repo size](https://img.shields.io/github/repo-size/kelu124/pyUn0-lib?style=plastic)
+![GitHub language count](https://img.shields.io/github/languages/count/kelu124/pyUn0-lib?style=plastic)
+![GitHub top language](https://img.shields.io/github/languages/top/kelu124/pyUn0-lib?style=plastic)
+![GitHub last commit](https://img.shields.io/github/last-commit/kelu124/pyUn0-lib?color=red&style=plastic)
+
+[![Patreon](https://img.shields.io/badge/patreon-donate-orange.svg)](https://www.patreon.com/kelu124) 
+[![Kofi](https://badgen.net/badge/icon/kofi?icon=kofi&label)](https://ko-fi.com/G2G81MT0G)
+
+[![Slack](https://badgen.net/badge/icon/slack?icon=slack&label)](https://join.slack.com/t/usdevkit/shared_invite/zt-2g501obl-z53YHyGOOMZjeCXuXzjZow)
+[![made-with-Markdown](https://img.shields.io/badge/Made%20with-Markdown-1f425f.svg)](http://commonmark.org)
+
 # un0rick companion - pyUn0 module
 
 The aim of this module is to provide a Python API to the [un0rick board](http://un0rick.cc/un0rick), a Lattice FPGA-powered ultrasound pulse-echo board.
 
-In this setup, the [board has been flashed](http://un0rick.cc/un0rick/rpi-setup) with a dedicated [binary](https://github.com/kelu124/un0rick/raw/master/bins/v1.1.bin) using iceprog, and connected to the RPi using a 40-pin ribbon.
+In this setup, the [board has been flashed](http://un0rick.cc/un0rick/rpi-setup) with a dedicated [binary](v1.1.bin) using iceprog, and connected to the RPi using a 40-pin ribbon.
 
 ## Setup
 
@@ -51,3 +62,6 @@ UN0RICK.JSON["data"] = UN0RICK.do_acquisition()      # Doing the acquisition and
 ![](/images/20201009a-1.png)
 
 ![](/images/20201009a-1-fft)
+
+
+
